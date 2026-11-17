@@ -157,7 +157,11 @@ pub fn double_in_thread(numbers: Vec<i32>) -> Vec<i32> {
     // TODO: Create a new thread to multiply each element of numbers by 2
     // Use thread::spawn and move closure
     // Use join().unwrap() to get result
-    todo!()
+
+    let handle = thread::spawn(move || {
+        numbers.into_iter().map(|n| n * 2).collect()
+    });
+    handle.join().unwrap()
 }
 
 /// Sum two vectors in parallel, returning a tuple of two sums.
@@ -167,7 +171,15 @@ pub fn double_in_thread(numbers: Vec<i32>) -> Vec<i32> {
 pub fn parallel_sum(a: Vec<i32>, b: Vec<i32>) -> (i32, i32) {
     // TODO: Create two threads to sum a and b respectively
     // Join both threads to get results
-    todo!()
+
+    let handle_a = thread::spawn(move || {
+        a.into_iter().sum::<i32>()
+    });
+    let handle_b = thread::spawn(move || {
+        b.into_iter().sum::<i32>()
+    });
+
+    (handle_a.join().unwrap(), handle_b.join().unwrap())
 }
 
 // ============================================================================
@@ -185,14 +197,21 @@ pub fn named_sleeper(value: i32, ms: u64) -> i32 {
     // TODO: Create a thread builder with name "sleeper"
     // TODO: Spawn a thread that sleeps for `ms` milliseconds and returns `value`
     // TODO: Join the thread and return the value
-    todo!()
+    let handle = thread::Builder::new()
+        .name("sleeper".to_owned())
+        .spawn(move || {
+            thread::sleep(Duration::from_millis(ms));
+            value
+        }).unwrap();
+
+    handle.join().unwrap()
 }
 
 thread_local! {
     static THREAD_COUNT: RefCell<usize> = RefCell::new(0);
 }
 
-/// Use thread‑local storage to count how many times each thread calls `increment`.
+/// Use thread‑local storae to count how many times each thread calls `increment`.
 ///
 /// Define a `thread_local!` static `THREAD_COUNT` of type `RefCell<usize>` initialized to 0.
 /// Each call to `increment` should increase the thread‑local count by 1 and return the new value.
@@ -200,7 +219,11 @@ thread_local! {
 /// Hint: Use `THREAD_COUNT.with(|cell| { ... })` to access the thread‑local variable.
 pub fn increment_thread_local() -> usize {
     // TODO: Use THREAD_COUNT.with to increment and return the new count
-    todo!()
+    THREAD_COUNT.with(|cell| {
+        let mut count = cell.borrow_mut();
+        *count += 1;
+        *count
+    })
 }
 
 /// Spawn two threads using a **scoped thread** to compute the sum of two slices without moving ownership.
@@ -216,7 +239,17 @@ pub fn scoped_slice_sum(a: &[i32], b: &[i32]) -> (i32, i32) {
     // TODO: Use thread::scope to spawn two threads
     // TODO: Each thread sums its slice
     // TODO: Wait for both threads and return the results
-    todo!()
+
+    thread::scope(|scope| {
+        let handle_a = scope.spawn(|| {
+            a.iter().sum::<i32>()
+        });
+        let handle_b = scope.spawn(|| {
+            b.iter().sum::<i32>()
+        });
+
+        (handle_a.join().unwrap(), handle_b.join().unwrap())
+    })
 }
 
 /// Handle a possible panic in a spawned thread.
@@ -233,7 +266,14 @@ pub fn scoped_slice_sum(a: &[i32], b: &[i32]) -> (i32, i32) {
 pub fn handle_panic(value: i32, should_panic: bool) -> Result<i32, ()> {
     // TODO: Spawn a thread that either panics or returns value
     // TODO: Join and map the result appropriately
-    todo!()
+    let handle = thread::spawn(move || {
+        if should_panic {
+            panic!("oops");
+        } else {
+            value
+        }
+    });
+    handle.join().map_err(|_| ()) // `_` this is called wildcard
 }
 
 #[cfg(test)]
@@ -306,7 +346,7 @@ mod tests {
     fn test_scoped_slice_sum() {
         let a = [1, 2, 3];
         let b = [10, 20, 30];
-        let (sum_a, sum_b) = scoped_slice_sum(&a, &b);
+        let (sum_a, sum_b) = scoped_slice_sum(&a, &b); // unsized coercion
         assert_eq!(sum_a, 6);
         assert_eq!(sum_b, 60);
         // Ensure slices are still accessible (they are borrowed, not moved).
