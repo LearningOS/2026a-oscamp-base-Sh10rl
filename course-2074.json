@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Sh10rl",
-  "commit": "a0320c3cfc5de5b11a5b0a444aaa8238586f4ef2",
-  "score": 3,
+  "commit": "985f8ddf00317f138b4e781d1858a854c408b69f",
+  "score": 7,
   "totalScore": 100,
   "exercises": [
     {
@@ -16,9 +16,9 @@
     {
       "name": "mutex_counter",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "channel",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Sh10rl",
-  "runId": "44087982704",
+  "runId": "44123903562",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
