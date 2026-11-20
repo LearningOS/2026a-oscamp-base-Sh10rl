@@ -33,6 +33,7 @@
 
 use std::io::{self, Read, Write};
 use std::process::{Command, Stdio};
+use std::thread;
 
 /// Execute the given shell command and return its stdout output.
 ///
@@ -53,7 +54,13 @@ pub fn run_command(program: &str, args: &[&str]) -> String {
     // TODO: Set stdout to Stdio::piped()
     // TODO: Execute with .output() and get output
     // TODO: Convert stdout to String and return
-    todo!()
+    let output = Command::new(program)
+        .args(args)
+        .stdout(Stdio::piped())
+        .output()
+        .expect("failed to run the program");
+
+    String::from_utf8(output.stdout).expect("the stdout is not UTF-8")
 }
 
 /// Write data to child process (cat) stdin via pipe and read its stdout output.
@@ -89,7 +96,23 @@ pub fn pipe_through_cat(input: &str) -> String {
     // TODO: Write input to child process stdin
     // TODO: Drop stdin to close pipe (otherwise cat won't exit)
     // TODO: Read output from child process stdout
-    todo!()
+    let mut child_handle = Command::new("cat")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn() // spawn 无论是 thread 还是 process，都会返回Result，所以可能是Ok或者Err
+        .unwrap(); // 返回了一个子进程的句柄，类型是 Child
+
+    thread::scope(|s| {
+        // take 会取stdin的Some(...)并返回他，同时将stdin的值置为None
+        let mut stdin_pipe = child_handle.stdin.take().unwrap(); // 安抚一下child结构体，并拿到ChildStdin句柄
+        let handle = s.spawn(move || {
+            stdin_pipe.write_all(input.as_bytes()); // take the underlying String's [u8] view and return its ref: &[u8]
+        });
+
+        handle.join().unwrap();
+        let child_output = child_handle.wait_with_output().unwrap();
+        String::from_utf8(child_output.stdout).unwrap()
+    })
 }
 
 /// Get child process exit code.
@@ -110,7 +133,12 @@ pub fn get_exit_code(command: &str) -> i32 {
     // TODO: Use Command::new("sh").args(["-c", command])
     // TODO: Execute and get status
     // TODO: Return exit code
-    todo!()
+    let status = Command::new("sh")
+        .args(["-c", command])
+        .status()
+        .expect("failed to run sh");
+
+    status.code().expect("failed to read the sh exit code")
 }
 
 /// Execute the given shell command and return its stdout output as a `Result`.
@@ -137,7 +165,14 @@ pub fn run_command_with_result(program: &str, args: &[&str]) -> io::Result<Strin
     // TODO: Set stdout to Stdio::piped()
     // TODO: Execute with .output() and handle Result
     // TODO: Convert stdout to String with from_utf8, mapping errors to io::Error
-    todo!()
+    let output = Command::new(program)
+        .args(args)
+        .stdout(Stdio::piped()) // 设置子进程的 stdout 用 Stdio::piped() 连接
+        .output()?; // 运行子进程并取运行结束后的 Output
+
+    String::from_utf8(output.stdout).map_err(|e| {
+        io::Error::new(io::ErrorKind::InvalidData, e)
+    })
 }
 
 /// Interact with `grep` via bidirectional pipes, filtering lines that contain a pattern.
@@ -167,7 +202,27 @@ pub fn pipe_through_grep(pattern: &str, input: &str) -> String {
     // TODO: Drop stdin to close pipe
     // TODO: Read output from child stdout line by line
     // TODO: Collect and return matching lines
-    todo!()
+    let mut grep_child = Command::new("grep")
+        .args(["-e", pattern])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    
+    let mut stdin_pipe = grep_child.stdin.take().unwrap();
+
+    let output = thread::scope(|s| {
+        s.spawn(move || {
+            stdin_pipe.write_all(input.as_bytes()).unwrap();
+            // drop stdin_pipe
+            // child process receives EOF
+        });
+        // thread end
+
+        grep_child.wait_with_output().expect("grep failed")
+    });
+
+    String::from_utf8(output.stdout).unwrap()
 }
 
 #[cfg(test)]

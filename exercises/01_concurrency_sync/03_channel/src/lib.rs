@@ -18,7 +18,23 @@ pub fn simple_send_recv(items: Vec<String>) -> Vec<String> {
     // TODO: Spawn thread to send each element in items
     // TODO: In main thread, receive all messages and collect into Vec
     // Hint: When all Senders are dropped, recv() returns Err
-    todo!()
+    let (tx, rx) = mpsc::channel();
+    let mut messages = Vec::with_capacity(items.len());
+    // thread start
+    let handle = thread::spawn(move || {
+        for item in items {
+            tx.send(item).unwrap(); // returns Ok(String) or Err(msg), then use unwrap() to take the value
+        }
+    });
+    // thread end
+
+    while let Ok(message) = rx.recv() { // block and wait till the Receiver receive a new value
+        messages.push(message);
+    }
+    // value all received
+    
+    handle.join().unwrap();
+    messages
 }
 
 /// Create `n_producers` producer threads, each sending a message in format `"msg from {id}"`.
@@ -30,7 +46,35 @@ pub fn multi_producer(n_producers: usize) -> Vec<String> {
     // TODO: Clone a sender for each producer
     // TODO: Remember to drop the original sender, otherwise receiver won't finish
     // TODO: Collect all messages and sort
-    todo!()
+
+    // create a chnnel (channle will return a Sender and a Receiver) without specifying the element type
+    let (tx, rx) = mpsc::channel();
+    let mut handles = Vec::with_capacity(n_producers);
+
+    for id in 0..n_producers {
+        let tx_for_thread = tx.clone(); // create a new tx_for_thread each time
+
+        // thread start
+        let handle = thread::spawn(move || {
+            tx_for_thread.send(format!("msg from {id}")).unwrap();
+            // drop tx_for_thread automatically when thread end
+        });
+        // thread end
+
+        handles.push(handle);
+    }
+
+
+    drop(tx);
+    // create the return value
+    let mut messages = Vec::with_capacity(n_producers);
+    // take out elements from the channel one by one.
+    // jump out automatically when the channel is empty (tx is gone)
+    while let Ok(message) = rx.recv() { // Result 是 Err 就 跳出，是 Ok 就进入循环体
+        messages.push(message);
+    }
+
+    messages
 }
 
 #[cfg(test)]
