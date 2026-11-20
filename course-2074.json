@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Sh10rl",
-  "commit": "985f8ddf00317f138b4e781d1858a854c408b69f",
-  "score": 7,
+  "commit": "d199a64d64ca97ddf227266bda8b78177fcfbdba",
+  "score": 15,
   "totalScore": 100,
   "exercises": [
     {
@@ -23,16 +23,16 @@
     {
       "name": "channel",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "process_pipe",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "mem_primitives",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Sh10rl",
-  "runId": "44123903562",
+  "runId": "44711655105",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
