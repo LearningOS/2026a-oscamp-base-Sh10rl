@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Sh10rl",
-  "commit": "d199a64d64ca97ddf227266bda8b78177fcfbdba",
-  "score": 15,
+  "commit": "0f953f0df2737f9a75228f7c41c3a49e66f126f6",
+  "score": 25,
   "totalScore": 100,
   "exercises": [
     {
@@ -23,9 +23,9 @@
     {
       "name": "channel",
       "max": 4,
-      "score": 4,
-      "status": "pass",
-      "exitCode": 0
+      "score": 0,
+      "status": "fail",
+      "exitCode": 101
     },
     {
       "name": "process_pipe",
@@ -37,23 +37,23 @@
     {
       "name": "mem_primitives",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "bump_allocator",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "free_list_allocator",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "syscall_wrapper",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Sh10rl",
-  "runId": "44711655105",
+  "runId": "45141939192",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
