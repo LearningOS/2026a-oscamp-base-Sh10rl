@@ -48,42 +48,60 @@ pub trait File: Send + Sync {
 
 /// File descriptor table
 pub struct FdTable {
-    // TODO: Design the internal structure
+    // Design the internal structure
     // Hint: use Vec<Option<Arc<dyn File>>>
     //       the index is the fd number, None means the fd is closed or unallocated
+    // Vec里面有一堆Arc指针，指针指向一个个文件对象，文件对象是实现了File trait的结构体对象
+    // Arc指针的核心用途就是让多个线程拥有指向同一个数据的指针，由Arc::clone()完成，每次clone使得数据对象的引用+1
+    table: Vec<Option<Arc<dyn File>>>, 
 }
 
 impl FdTable {
     /// Create an empty fd table
     pub fn new() -> Self {
-        // TODO
-        todo!()
+        Self { table: Vec::new() }
     }
 
     /// Allocate a new fd, return the fd number.
     ///
     /// Prefers reusing the smallest closed fd number; if no free slot, appends to the end.
     pub fn alloc(&mut self, file: Arc<dyn File>) -> usize {
-        // TODO
-        todo!()
+        // 返回：元素是二元tuple的iter，for语法糖自动完成.next()和Some()解包操作
+        for (fd, slot) in self.table.iter_mut().enumerate() {
+            // 找fd table有没有空位
+            if slot.is_none() { // 调close(fd)关掉文件时对应self.table的位置被置为None，所以先看是不是None
+                *slot = Some(file);
+                return fd;
+            }
+        }
+
+        // 没找到空位，直接在table末尾添push一个新的Some包裹的文件对象指针
+        let fd = self.table.len();
+        self.table.push(Some(file));
+        fd
     }
 
     /// Get the file object for an fd. Returns None if the fd doesn't exist or is closed.
     pub fn get(&self, fd: usize) -> Option<Arc<dyn File>> {
-        // TODO
-        todo!()
+        self.table.get(fd).and_then(|x| x.clone())
     }
 
     /// Close an fd. Returns true on success, false if the fd doesn't exist or is already closed.
     pub fn close(&mut self, fd: usize) -> bool {
-        // TODO
-        todo!()
+        self.table.get_mut(fd).and_then(Option::take).is_some()
+        /*
+        if let Some(slot) = self.table.get_mut(fd) {
+            slot.take().is_some()
+        } else {
+            false
+        }
+        */
     }
 
     /// Return the number of currently allocated fds (excluding closed ones)
     pub fn count(&self) -> usize {
-        // TODO
-        todo!()
+        // filter()传入一个闭包，闭包返回值决定当前元素是否保留，1保留，0丢弃
+        self.table.iter().filter(|slot| slot.is_some()).count()
     }
 }
 

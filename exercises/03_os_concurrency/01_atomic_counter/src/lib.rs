@@ -25,20 +25,23 @@ impl AtomicCounter {
     ///
     /// Hint: use `fetch_add` with `Ordering::Relaxed`
     pub fn increment(&self) -> u64 {
-        // TODO
-        todo!()
+        self.value.fetch_add(1, Ordering::Relaxed) // 只保证fetch_add完整执行，前后步骤依旧乱序
     }
 
     /// Atomically decrements by 1, returns the value **before** decrement.
     pub fn decrement(&self) -> u64 {
-        // TODO
-        todo!()
+        self.value.fetch_sub(1, Ordering::Relaxed) // 只保证fetch_sub完整执行，前后步骤依旧乱序
     }
 
     /// Gets the current value.
     pub fn get(&self) -> u64 {
-        // TODO
-        todo!()
+        self.value.load(Ordering::Relaxed) // 只保证load完整执行，前后的无关操作依旧乱序
+        /* e.g.
+        x = 1;                                              // 无关操作，可能被重排到 fetch_add 后面
+        let old = self.value.fetch_add(1, Ordering::Relaxed);
+        let next = old + 10;                                // 依赖 old 的值，一定在 fetch_add 后面执行
+        y = 2;                                              // 无关操作，可能被重排到 fetch_add 前面
+         */
     }
 
     /// Atomic CAS (Compare-And-Swap) operation.
