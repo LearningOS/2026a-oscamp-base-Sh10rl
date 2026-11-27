@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-Sh10rl",
-  "commit": "a7e9d6392b51a1404391e58a334a5a9c790f9884",
-  "score": 29,
+  "commit": "f1dfdd574d1392f43947231ad720206e40a85f97",
+  "score": 39,
   "totalScore": 100,
   "exercises": [
     {
@@ -58,16 +58,16 @@
     {
       "name": "syscall_wrapper",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "fd_table",
       "max": 5,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 5,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "atomic_counter",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "Sh10rl",
-  "runId": "45147268156",
+  "runId": "45958111678",
   "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
